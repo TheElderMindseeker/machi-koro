@@ -16,85 +16,133 @@ class EstablishmentType(Enum):
     coffee = auto()
 
 
+class EstablishmentColor(Enum):
+    blue = auto()
+    green = auto()
+    red = auto()
+
+
+CONSTANT_MULTIPLIER = 'constant'
+
+
 @dataclass
 class Establishment:
     spread: DiceSpread
     name: str
+    color: EstablishmentColor
     type: EstablishmentType
     price: int
+    income: int
+    multiplier: str
 
 
 WheatField = Establishment(
-    (1, 1),
+    DiceSpread(1, 1),
     'Wheat Field',
+    EstablishmentColor.blue,
     EstablishmentType.wheat,
     1,
+    1,
+    CONSTANT_MULTIPLIER,
 )
 Ranch = Establishment(
-    (2, 2),
+    DiceSpread(2, 2),
     'Ranch',
+    EstablishmentColor.blue,
     EstablishmentType.cow,
     1,
+    1,
+    CONSTANT_MULTIPLIER,
 )
 Forest = Establishment(
-    (5, 5),
+    DiceSpread(5, 5),
     'Forest',
+    EstablishmentColor.blue,
     EstablishmentType.cog,
     3,
+    1,
+    CONSTANT_MULTIPLIER,
 )
 Mine = Establishment(
-    (9, 9),
+    DiceSpread(9, 9),
     'Mine',
+    EstablishmentColor.blue,
     EstablishmentType.cog,
     6,
+    5,
+    CONSTANT_MULTIPLIER,
 )
 AppleOrchard = Establishment(
-    (10, 10),
+    DiceSpread(10, 10),
     'Apple Orchard',
+    EstablishmentColor.blue,
     EstablishmentType.wheat,
     3,
+    3,
+    CONSTANT_MULTIPLIER,
 )
 
 Bakery = Establishment(
-    (2, 3),
+    DiceSpread(2, 3),
     'Bakery',
+    EstablishmentColor.green,
     EstablishmentType.store,
     1,
+    1,
+    CONSTANT_MULTIPLIER,
 )
 ConvenienceStore = Establishment(
-    (4, 4),
+    DiceSpread(4, 4),
     'Convenience Store',
+    EstablishmentColor.green,
     EstablishmentType.store,
     2,
+    3,
+    CONSTANT_MULTIPLIER,
 )
 CheeseFactory = Establishment(
-    (7, 7),
+    DiceSpread(7, 7),
     'Cheese Factory',
+    EstablishmentColor.green,
     EstablishmentType.factory,
     5,
+    3,
+    f'type:{EstablishmentType.cow.name}',
 )
 FurnitureFactory = Establishment(
-    (8, 8),
+    DiceSpread(8, 8),
     'Furniture Factory',
+    EstablishmentColor.green,
     EstablishmentType.factory,
     3,
+    3,
+    f'type:{EstablishmentType.cog.name}',
 )
 FnVMarket = Establishment(
-    (11, 12),
+    DiceSpread(11, 12),
     'Fruit and Vegetable Market',
+    EstablishmentColor.green,
     EstablishmentType.fruit,
     2,
+    2,
+    f'type:{EstablishmentType.wheat.name}',
 )
 
 Cafe = Establishment(
-    (3, 3),
+    DiceSpread(3, 3),
     'Cafe',
+    EstablishmentColor.red,
     EstablishmentType.coffee,
     2,
+    1,
+    CONSTANT_MULTIPLIER,
 )
 Restaurant = Establishment(
-    (9, 10),
+    DiceSpread(9, 10),
     'Restaurant',
+    EstablishmentColor.red,
     EstablishmentType.coffee,
     3,
+    2,
+    CONSTANT_MULTIPLIER,
 )

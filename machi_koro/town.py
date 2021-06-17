@@ -19,3 +19,12 @@ class Town:
                 'card': establishment,
                 'count': 1,
             }
+
+    def get_activated_cards(self, color, throw_result):
+        cards = dict()
+        for record in self.establishments.values():
+            card = record['card']
+            if (card.color == color
+                    and card.spread.min <= throw_result <= card.spread.max):
+                cards[card.name] = record
+        return cards

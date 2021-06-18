@@ -45,4 +45,13 @@ class Town:
             effective_income *= total_estab_count
         return count * effective_income
 
+    @property
+    def landmarks(self):
+        return (
+            self.train_station,
+            self.shopping_mall,
+            self.amusement_park,
+            self.radio_tower,
+        )
+
     SHOPPING_MALL_TYPES = (EstablishmentType.store, EstablishmentType.coffee)

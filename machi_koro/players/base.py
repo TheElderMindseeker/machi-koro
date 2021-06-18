@@ -12,5 +12,13 @@ class Player(ABC):
         return self.name == other.name
 
     @abstractmethod
-    def choose_dice(self, game):
+    def choose_dice_count(self, game):
+        raise NotImplementedError
+
+    @abstractmethod
+    def need_reroll(self, game, dice):
+        raise NotImplementedError
+
+    @abstractmethod
+    def choose_to_build(self, game):
         raise NotImplementedError

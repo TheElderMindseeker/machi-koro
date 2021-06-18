@@ -1,3 +1,4 @@
+from copy import copy
 from random import randint
 
 from machi_koro.cards.establishment import *
@@ -25,14 +26,15 @@ class Game:
         winner = None
         while winner is None:
             for player in self.players:
-                self.make_turn(player)
+                self.active_player = player
+                self.make_turn()
                 if self.is_winner(player):
                     winner = player
         return winner
 
-    def make_turn(self, player):
-        if player.town.train_station.built:
-            dice_count = player.choose_dice(self)
+    def make_turn(self):
+        if self.active_player.town.train_station.built:
+            dice_count = self.active_player.choose_dice(self)
             if dice_count not in (1, 2):
                 raise IllegalActionError('Player tried to throw %d dice',
                                          dice_count)
@@ -40,7 +42,7 @@ class Game:
             dice_count = 1
 
         throw_result = self.throw_dice(dice_count)
-        self.activate_cards(player, throw_result)
+        self.activate_cards(throw_result)
 
     @staticmethod
     def is_winner(player):
@@ -58,16 +60,46 @@ class Game:
             dice_sum += randint(1, 6)
         return dice_sum
 
-    def activate_cards(self, active_player, throw_result, dry_run=False):
-        player_funds = {
+    def activate_cards(self, throw_result, dry_run=False):
+        self.player_funds = {
             player.name: player.coins for player in self.players
         }
-
-        active_index = self.players.index(active_player)
+        active_index = self.players.index(self.active_player)
         reverse_order = reversed(self.players[active_index + 1:]
                                  + self.players[:active_index])
         for player in reverse_order:
-            pass
+            self._activate_red_cards(player, throw_result)
+        for player in self.players:
+            self._activate_blue_cards(player, throw_result)
+        self._activate_green_cards(throw_result)
+        if not dry_run:
+            for player in self.players:
+                player.coins = self.player_funds[player.name]
+        return copy(self.player_funds)
+
+    def _activate_red_cards(self, player, throw_result):
+        activated_card_names = player.town.get_activated_card_names(
+            EstablishmentColor.red, throw_result)
+        for card_name in activated_card_names:
+            income = player.town.calculate_income(card_name)
+            coins_stolen = min(
+                income, self.player_funds[self.active_player.name])
+            self.player_funds[self.active_player.name] -= coins_stolen
+            self.player_funds[player.name] += coins_stolen
+
+    def _activate_blue_cards(self, player, throw_result):
+        activated_card_names = player.town.get_activated_card_names(
+            EstablishmentColor.blue, throw_result)
+        for card_name in activated_card_names:
+            income = player.town.calculate_income(card_name)
+            self.player_funds[player.name] += income
+
+    def _activate_green_cards(self, throw_result):
+        activated_card_names = self.active_player.town.get_activated_card_names(
+            EstablishmentColor.green, throw_result)
+        for card_name in activated_card_names:
+            income = self.active_player.town.calculate_income(card_name)
+            self.player_funds[self.active_player.name] += income
 
     ESTABLISHMENTS = (
         WheatField, Ranch, Forest, Mine, AppleOrchard, Bakery, ConvenienceStore,

@@ -10,6 +10,6 @@ master_logger.addHandler(logging.StreamHandler())
 player = ConsolePlayer('Daniil')
 game = Game([player])
 game.setup()
-player.coins = 100
+player.town.train_station.built = True
 winner = game.play()
 master_logger.info('Winner is %s', winner.name)

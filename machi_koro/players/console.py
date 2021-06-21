@@ -1,3 +1,6 @@
+import itertools
+from collections import defaultdict
+
 from machi_koro.players.base import Player
 
 
@@ -5,6 +8,7 @@ class ConsolePlayer(Player):
 
     def choose_dice_count(self, game):
         self.print_player_town()
+        self.print_expected_income(game)
         return int(input('Choose number of dice to roll: '))
 
     def need_reroll(self, game, dice):
@@ -46,15 +50,43 @@ class ConsolePlayer(Player):
         print('    Your town:')
         print('  Landmarks:')
         for landmark in self.town.landmarks:
-            print('{} {}'.format(
-                '[+]' if landmark.built else '[ ]',
-                landmark.name))
+            print('{} {}'.format('[+]' if landmark.built else '[ ]',
+                                 landmark.name))
         print('  Establishments:')
         sorted_establishments = sorted(self.town.establishments.values(),
                                        key=lambda estab: estab['card'].spread)
         for record in sorted_establishments:
             print('{} x {}'.format(record['count'], record['card'].name))
         print()
+
+    def print_expected_income(self, game):
+        for dice_count in (1, 2):
+            print(f'  Expected income for {dice_count} dice:')
+            expected_income = self._calculate_expected_income(game, dice_count)
+            for dice in sorted(expected_income['dice'].keys()):
+                income = expected_income['dice'][dice]
+                print(f'D = {dice:2}: {income:.2f}')
+            print('Total: {:.2f}'.format(expected_income['total']))
+        print()
+
+    def _calculate_expected_income(self, game, dice_count):
+        outcomes = dict()
+        for dice in itertools.product(range(1, 7), repeat=dice_count):
+            throw_result = sum(dice)
+            player_funds = game.activate_cards(throw_result, dry_run=True)
+            outcomes[dice] = player_funds[self.name] - self.coins
+        total_outcomes = 6 ** dice_count
+        expected_income = {
+            'dice': defaultdict(list),
+            'total': sum(outcomes.values()) / total_outcomes,
+        }
+        for dice, income in outcomes.items():
+            expected_income['dice'][sum(dice)].append(income)
+        expected_income['dice'] = {
+            key: sum(value) / len(value)
+            for key, value in expected_income['dice'].items()
+        }
+        return expected_income
 
     @staticmethod
     def print_reserve(game):

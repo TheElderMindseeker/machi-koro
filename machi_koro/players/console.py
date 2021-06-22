@@ -27,10 +27,7 @@ class ConsolePlayer(Player):
             return choice
         if choice in game.reserve.stacks.keys():
             return game.reserve.stacks[choice]['card']
-        landmarks_by_name = {
-            landmark.name: landmark for landmark in self.town.landmarks
-        }
-        return landmarks_by_name[choice]
+        return self.town.landmarks[choice]
 
     def is_eligible_choice(self, game, choice):
         if choice.lower() == 'nothing' or not choice:
@@ -38,18 +35,15 @@ class ConsolePlayer(Player):
         if choice in game.reserve.stacks.keys():
             card = game.reserve.stacks[choice]['card']
             return self.coins >= card.price
-        landmarks_by_name = {
-            landmark.name: landmark for landmark in self.town.landmarks
-        }
-        if choice in landmarks_by_name.keys():
-            landmark = landmarks_by_name[choice]
+        if choice in self.town.landmarks.keys():
+            landmark = self.town.landmarks[choice]
             return self.coins >= landmark.price
         return False
 
     def print_player_town(self):
         print('    Your town:')
         print('  Landmarks:')
-        for landmark in self.town.landmarks:
+        for landmark in self.town.landmarks.values():
             print('{} {}'.format('[+]' if landmark.built else '[ ]',
                                  landmark.name))
         print('  Establishments:')
@@ -61,12 +55,12 @@ class ConsolePlayer(Player):
 
     def print_expected_income(self, game):
         for dice_count in (1, 2):
-            print(f'  Expected income for {dice_count} dice:')
+            print(f'    Expected income for {dice_count} dice:')
             expected_income = self._calculate_expected_income(game, dice_count)
+            print('  Total: {:.2f}'.format(expected_income['total']))
             for dice in sorted(expected_income['dice'].keys()):
                 income = expected_income['dice'][dice]
                 print(f'D = {dice:2}: {income:.2f}')
-            print('Total: {:.2f}'.format(expected_income['total']))
         print()
 
     def _calculate_expected_income(self, game, dice_count):

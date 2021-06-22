@@ -47,6 +47,10 @@ class Game:
         if self.active_player.town.radio_tower.built:
             if self.active_player.need_reroll(self, dice):
                 dice = self.throw_dice(dice_count)
+        will_take_bonus_turn = (
+            self.active_player.town.amusement_park.built
+            and not bonus and dice_count == 2 and dice[0] == dice[1]
+        )
         self.activate_cards(sum(dice))
         card_to_build = self.active_player.choose_to_build(self)
         if isinstance(card_to_build, Establishment):
@@ -59,6 +63,9 @@ class Game:
             self.logger.info('%s builds %s', self.active_player.name,
                              taken_card.name)
         elif isinstance(card_to_build, Landmark):
+            if card_to_build.built:
+                raise IllegalActionError('Landmark %s already built',
+                                         card_to_build.name)
             if card_to_build.price > self.active_player.coins:
                 raise IllegalActionError('Player %s has insufficient funds',
                                          self.active_player.name)
@@ -69,8 +76,7 @@ class Game:
         else:
             self.logger.info('%s chooses to build nothing',
                              self.active_player.name)
-        if (self.active_player.town.amusement_park.built
-                and not bonus and dice_count == 2 and dice[0] == dice[1]):
+        if will_take_bonus_turn and not self.is_winner(self.active_player):
             self.logger.info('%s got a double and makes a bonus turn',
                              self.active_player.name)
             self.make_turn(bonus=True)

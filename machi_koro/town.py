@@ -47,11 +47,14 @@ class Town:
 
     @property
     def landmarks(self):
-        return (
+        landmarks = (
             self.train_station,
             self.shopping_mall,
             self.amusement_park,
             self.radio_tower,
         )
+        return {
+            landmark.name: landmark for landmark in landmarks
+        }
 
     SHOPPING_MALL_TYPES = (EstablishmentType.store, EstablishmentType.coffee)
